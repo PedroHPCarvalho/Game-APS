@@ -1,0 +1,59 @@
+# .clinerules — AquaClean
+
+## Contexto do Projeto
+
+Este é um jogo Android chamado **AquaClean**, desenvolvido com **LibGDX** (Java).
+O projeto foi gerado pelo **gdx-liftoff** e já possui a estrutura de módulos `core/` e `android/` configurada.
+
+Leia os seguintes arquivos antes de qualquer implementação:
+1. `GAME_DESIGN.md` — design do jogo, mecânicas e parâmetros.
+2. `ARCHITECTURE.md` — estrutura de classes, pacotes e convenções técnicas.
+3. `AGENT_INSTRUCTIONS.md` — lista de tarefas ordenadas a implementar.
+
+---
+
+## Stack
+
+- **Linguagem**: Java 11+
+- **Engine**: LibGDX
+- **Plataforma alvo**: Android
+- **Build**: Gradle (não altere `build.gradle` salvo se explicitamente necessário)
+
+---
+
+## Regras de Código
+
+- Todos os arquivos Java ficam em `core/src/` no pacote raiz do projeto.
+- Adapte o pacote raiz ao que já existe no projeto (ex: `com.github.pedro.aquaclean`). Não crie um pacote novo.
+- **Nenhum número mágico**: todas as constantes ficam exclusivamente em `GameConfig.java`.
+- **Sem campos `static`** para instâncias LibGDX (Texture, SpriteBatch, etc.).
+- Todo `Disposable` do LibGDX **deve** ter `dispose()` chamado na screen ou classe que o criou.
+- Nomes de classes e métodos em **inglês**. Comentários podem ser em português.
+- Não use bibliotecas externas além das já incluídas pelo gdx-liftoff.
+
+---
+
+## Assets
+
+- Assets ficam em `android/assets/`.
+- Se não houver arquivos `.png`, use `ShapeRenderer` como placeholder. O jogo deve ser jogável sem assets visuais.
+- Não crie subpastas de assets sem necessidade.
+
+---
+
+## Fluxo de Trabalho
+
+1. Execute as tasks de `AGENT_INSTRUCTIONS.md` **em ordem**, uma por vez.
+2. Após cada task, verifique se o arquivo compila antes de avançar.
+3. Não refatore código de tasks anteriores a menos que seja necessário para a task atual.
+4. Ao final (TASK-11), rode o checklist de verificação descrito no arquivo.
+
+---
+
+## O que NÃO fazer
+
+- Não altere `AndroidLauncher.java` nem arquivos de configuração do Gradle.
+- Não adicione dependências ao `build.gradle`.
+- Não crie telas ou funcionalidades além das descritas no `GAME_DESIGN.md`.
+- Não use `Scene2D` para renderizar os lixos — apenas para UI (menus e HUD).
+- Não implemente som a menos que todas as outras tasks estejam concluídas.

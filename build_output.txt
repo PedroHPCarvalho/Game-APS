@@ -1,0 +1,30 @@
+
+c:\Users\pedro\Documents\apsfinal>if "Windows_NT" == "Windows_NT" setlocal
+
+c:\Users\pedro\Documents\apsfinal>set DIRNAME=c:\Users\pedro\Documents\apsfinal\ 
+
+c:\Users\pedro\Documents\apsfinal>if "c:\Users\pedro\Documents\apsfinal\" == "" set DIRNAME=. 
+
+c:\Users\pedro\Documents\apsfinal>set APP_BASE_NAME=gradlew 
+
+c:\Users\pedro\Documents\apsfinal>set APP_HOME=c:\Users\pedro\Documents\apsfinal\ 
+
+c:\Users\pedro\Documents\apsfinal>for %i in ("c:\Users\pedro\Documents\apsfinal\") do set APP_HOME=%~fi 
+
+c:\Users\pedro\Documents\apsfinal>set APP_HOME=c:\Users\pedro\Documents\apsfinal\ 
+
+c:\Users\pedro\Documents\apsfinal>set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m" 
+
+c:\Users\pedro\Documents\apsfinal>if defined JAVA_HOME goto findJavaFromJavaHome 
+
+c:\Users\pedro\Documents\apsfinal>set JAVA_EXE=java.exe 
+
+c:\Users\pedro\Documents\apsfinal>java.exe -version  1>NUL 2>&1 
+
+c:\Users\pedro\Documents\apsfinal>if 0 EQU 0 goto execute 
+
+c:\Users\pedro\Documents\apsfinal>"java.exe" "-Xmx64m" "-Xms64m"   "-Dorg.gradle.appname=gradlew" -jar "c:\Users\pedro\Documents\apsfinal\\gradle\wrapper\gradle-wrapper.jar" core:compileJava --no-daemon 
+
+c:\Users\pedro\Documents\apsfinal>if 0 EQU 0 goto mainEnd 
+
+c:\Users\pedro\Documents\apsfinal>if "Windows_NT" == "Windows_NT" endlocal
