@@ -16,6 +16,8 @@ public class TrashManager {
     private List<TrashItem> activeTrash;
     private float spawnTimer;
     private float spawnInterval;
+    private float virtualWidth;
+    private float virtualHeight;
 
     /**
      * Construtor inicializa a lista e o primeiro intervalo de spawn.
@@ -24,6 +26,19 @@ public class TrashManager {
         this.activeTrash = new ArrayList<TrashItem>();
         this.spawnTimer = 0f;
         this.spawnInterval = MathUtils.random(GameConfig.SPAWN_INTERVAL_MIN, GameConfig.SPAWN_INTERVAL_MAX);
+        // Inicializa com proporção retrato (padrão)
+        this.virtualWidth = GameConfig.VIRTUAL_WIDTH;  // 480
+        this.virtualHeight = GameConfig.VIRTUAL_HEIGHT; // 854
+    }
+
+    /**
+     * Atualiza as dimensões virtuais conforme a orientação do dispositivo.
+     * @param width nova largura virtual
+     * @param height nova altura virtual
+     */
+    public void setVirtualBounds(float width, float height) {
+        this.virtualWidth = width;
+        this.virtualHeight = height;
     }
 
     /**
@@ -62,8 +77,8 @@ public class TrashManager {
      * Spawna um novo lixo com posição e tipo aleatórios.
      */
     private void spawnTrash() {
-        float x = MathUtils.random(40f, GameConfig.VIRTUAL_WIDTH - 100f);
-        float y = MathUtils.random(100f, GameConfig.VIRTUAL_HEIGHT - 150f);
+        float x = MathUtils.random(40f, virtualWidth - 100f);
+        float y = MathUtils.random(100f, virtualHeight - 150f);
         float maxLife = MathUtils.random(GameConfig.TRASH_LIFE_MIN, GameConfig.TRASH_LIFE_MAX);
         TrashItem.TrashType[] types = TrashItem.TrashType.values();
         TrashItem.TrashType type = types[MathUtils.random(types.length - 1)];

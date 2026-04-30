@@ -33,13 +33,20 @@ public class HudRenderer {
         batch.begin();
 
         // Topo esquerdo: Tempo
-        font.draw(batch, "TEMPO: " + (int) scoreManager.getTimeRemaining() + "s", 10f, 790f);
+        String timeText = "TEMPO: " + (int) scoreManager.getTimeRemaining() + "s";
+        font.draw(batch, timeText, 10f, hudCamera.viewportHeight - 20f);
 
         // Topo centro: Lixo coletado / Meta
-        font.draw(batch, "LIXO: " + scoreManager.getCollected() + "/" + scoreManager.getCurrentGoal(), 150f, 790f);
+        String goalText = "LIXO: " + scoreManager.getCollected() + "/" + scoreManager.getCurrentGoal();
+        com.badlogic.gdx.graphics.g2d.GlyphLayout goalLayout = new com.badlogic.gdx.graphics.g2d.GlyphLayout(font, goalText);
+        float goalX = (hudCamera.viewportWidth - goalLayout.width) / 2f;
+        font.draw(batch, goalLayout, goalX, hudCamera.viewportHeight - 20f);
 
         // Topo direito: Score
-        font.draw(batch, "SCORE: " + scoreManager.getScore(), 320f, 790f);
+        String scoreText = "SCORE: " + scoreManager.getScore();
+        com.badlogic.gdx.graphics.g2d.GlyphLayout scoreLayout = new com.badlogic.gdx.graphics.g2d.GlyphLayout(font, scoreText);
+        float scoreX = hudCamera.viewportWidth - scoreLayout.width - 10f;
+        font.draw(batch, scoreLayout, scoreX, hudCamera.viewportHeight - 20f);
 
         batch.end();
     }

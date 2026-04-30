@@ -74,7 +74,7 @@ public class ResultScreen implements Screen {
                 dispose();
             }
         });
-        table.add(playAgainButton).size(280f, 60f).padBottom(20f).row();
+        table.add(playAgainButton).size(com.badlogic.gdx.scenes.scene2d.ui.Value.percentWidth(0.5f, table), com.badlogic.gdx.scenes.scene2d.ui.Value.percentHeight(0.08f, table)).padBottom(20f).row();
 
         // Botão MENU
         TextButton menuButton = new TextButton("MENU", skin);
@@ -85,7 +85,7 @@ public class ResultScreen implements Screen {
                 dispose();
             }
         });
-        table.add(menuButton).size(200f, 60f);
+        table.add(menuButton).size(com.badlogic.gdx.scenes.scene2d.ui.Value.percentWidth(0.4f, table), com.badlogic.gdx.scenes.scene2d.ui.Value.percentHeight(0.08f, table));
 
         stage.addActor(table);
     }
@@ -106,7 +106,26 @@ public class ResultScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-        viewport.update(width, height);
+        // Detecta orientação física
+        boolean isLandscape = width > height;
+        float newWorldWidth;
+        float newWorldHeight;
+        if (isLandscape) {
+            // Paisagem: inverte para 16:9
+            newWorldWidth = 854f;  // GameConfig.VIRTUAL_HEIGHT
+            newWorldHeight = 480f; // GameConfig.VIRTUAL_WIDTH
+        } else {
+            // Retrato: mantém 9:16
+            newWorldWidth = 480f; // GameConfig.VIRTUAL_WIDTH
+            newWorldHeight = 854f; // GameConfig.VIRTUAL_HEIGHT
+        }
+        viewport.setWorldSize(newWorldWidth, newWorldHeight);
+        viewport.update(width, height, true);
+        // Atualiza a câmera
+        if (camera != null) {
+            camera.position.set(newWorldWidth / 2, newWorldHeight / 2, 0);
+            camera.update();
+        }
     }
 
     @Override

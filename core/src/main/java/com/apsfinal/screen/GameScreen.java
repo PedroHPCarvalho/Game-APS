@@ -34,12 +34,17 @@ public class GameScreen implements Screen {
     private float goalMessageTimer;
     private BitmapFont goalFont;
     private Vector3 touchPoint;
+    private float virtualWidth;
+    private float virtualHeight;
 
     public GameScreen(AquaCleanGame game) {
         this.game = game;
         this.camera = new OrthographicCamera();
         this.hudCamera = new OrthographicCamera();
-        this.viewport = new FitViewport(GameConfig.VIRTUAL_WIDTH, GameConfig.VIRTUAL_HEIGHT, camera);
+        // Inicializa com proporção retrato (padrão)
+        this.virtualWidth = GameConfig.VIRTUAL_WIDTH;  // 480
+        this.virtualHeight = GameConfig.VIRTUAL_HEIGHT; // 854
+        this.viewport = new FitViewport(virtualWidth, virtualHeight, camera);
         this.trashManager = new TrashManager();
         this.scoreManager = new ScoreManager();
         this.hudRenderer = new HudRenderer(scoreManager);
@@ -99,7 +104,7 @@ public class GameScreen implements Screen {
         
         // Background
         shapeRenderer.setColor(0.3f, 0.6f, 0.9f, 1f);
-        shapeRenderer.rect(0, 0, GameConfig.VIRTUAL_WIDTH, GameConfig.VIRTUAL_HEIGHT);
+        shapeRenderer.rect(0, 0, virtualWidth, virtualHeight);
         
         // Trash items
         trashManager.render(shapeRenderer);
@@ -114,16 +119,44 @@ public class GameScreen implements Screen {
         if (goalJustReached) {
             batch.setProjectionMatrix(hudCamera.combined);
             batch.begin();
-            goalFont.draw(batch, "+15s", 
-                GameConfig.VIRTUAL_WIDTH / 2f - 60f, 
-                GameConfig.VIRTUAL_HEIGHT / 2f);
+            com.badlogic.gdx.graphics.g2d.GlyphLayout bonusLayout = new com.badlogic.gdx.graphics.g2d.GlyphLayout(goalFont, "+15s");
+            float bonusX = (virtualWidth - bonusLayout.width) / 2f;
+            float bonusY = virtualHeight / 2f + bonusLayout.height / 2f;
+            goalFont.draw(batch, bonusLayout, bonusX, bonusY);
             batch.end();
         }
     }
 
     @Override
     public void resize(int width, int height) {
+        // Detecta orientação física
+        boolean isLandscape = width > height;
+        
+        // Ajusta dimensões virtuais conforme a orientação
+        if (isLandscape) {
+            // Paisagem: inverte para 16:9
+            virtualWidth = GameConfig.VIRTUAL_HEIGHT;  // 854
+            virtualHeight = GameConfig.VIRTUAL_WIDTH; // 480
+        } else {
+            // Retrato: mantém 9:16
+            virtualWidth = GameConfig.VIRTUAL_WIDTH;  // 480
+            virtualHeight = GameConfig.VIRTUAL_HEIGHT; // 854
+        }
+        
+        // Atualiza o viewport com as novas dimensões virtuais
+        viewport.setWorldSize(virtualWidth, virtualHeight);
         viewport.update(width, height, true);
+        
+        // Atualiza a câmera do jogo e do HUD
+        camera.position.set(virtualWidth / 2, virtualHeight / 2, 0);
+        hudCamera.position.set(virtualWidth / 2, virtualHeight / 2, 0);
+        camera.update();
+        hudCamera.update();
+        
+        // Passa as novas dimensões para o TrashManager
+        if (trashManager != null) {
+            trashManager.setVirtualBounds(virtualWidth, virtualHeight);
+        }
     }
 
     @Override

@@ -1,15 +1,14 @@
 package com.apsfinal.screen;
 
+import com.apsfinal.AquaCleanGame;
+import com.apsfinal.config.GameConfig;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.apsfinal.AquaCleanGame;
-import com.apsfinal.config.GameConfig;
 
 /**
  * Tela de splash que exibe o logo/nome do jogo por 2 segundos.
@@ -59,17 +58,36 @@ public class SplashScreen implements Screen {
         camera.update();
         batch.setProjectionMatrix(camera.combined);
 
-        // Renderiza o título centralizado
+        // Renderiza o título centralizado dinamicamente baseado nas dimensões virtuais atuais
         batch.begin();
-        font.draw(batch, "AquaClean", 
-            GameConfig.VIRTUAL_WIDTH / 2f - 120f, 
-            GameConfig.VIRTUAL_HEIGHT / 2f + 20f);
+        // Usa GlyphLayout para calcular a largura do texto
+        com.badlogic.gdx.graphics.g2d.GlyphLayout layout = new com.badlogic.gdx.graphics.g2d.GlyphLayout(font, "AquaClean");
+        float titleX = (viewport.getWorldWidth() - layout.width) / 2f;
+        float titleY = viewport.getWorldHeight() / 2f + layout.height / 2f;
+        font.draw(batch, layout, titleX, titleY);
         batch.end();
     }
 
     @Override
     public void resize(int width, int height) {
-        viewport.update(width, height);
+        // Detecta orientação física
+        boolean isLandscape = width > height;
+        float newWorldWidth;
+        float newWorldHeight;
+        if (isLandscape) {
+            // Paisagem: inverte para 16:9
+            newWorldWidth = GameConfig.VIRTUAL_HEIGHT;  // 854
+            newWorldHeight = GameConfig.VIRTUAL_WIDTH; // 480
+        } else {
+            // Retrato: mantém 9:16
+            newWorldWidth = GameConfig.VIRTUAL_WIDTH;  // 480
+            newWorldHeight = GameConfig.VIRTUAL_HEIGHT; // 854
+        }
+        viewport.setWorldSize(newWorldWidth, newWorldHeight);
+        viewport.update(width, height, true);
+        // Atualiza a câmera
+        camera.position.set(newWorldWidth / 2, newWorldHeight / 2, 0);
+        camera.update();
     }
 
     @Override
