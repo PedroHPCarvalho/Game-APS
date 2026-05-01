@@ -3,6 +3,7 @@ package com.apsfinal.screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -44,10 +45,15 @@ public class GameScreen implements Screen {
         // Inicializa com proporção retrato (padrão)
         this.virtualWidth = GameConfig.VIRTUAL_WIDTH;  // 480
         this.virtualHeight = GameConfig.VIRTUAL_HEIGHT; // 854
+        // Configura a câmera do HUD com as dimensões virtuais
+        this.hudCamera.viewportWidth = virtualWidth;
+        this.hudCamera.viewportHeight = virtualHeight;
+        this.hudCamera.position.set(virtualWidth / 2, virtualHeight / 2, 0);
+        this.hudCamera.update();
         this.viewport = new FitViewport(virtualWidth, virtualHeight, camera);
         this.trashManager = new TrashManager();
         this.scoreManager = new ScoreManager();
-        this.hudRenderer = new HudRenderer(scoreManager);
+        this.hudRenderer = new HudRenderer(scoreManager, virtualWidth, virtualHeight);
         this.shapeRenderer = new ShapeRenderer();
         this.batch = new SpriteBatch();
         this.goalJustReached = false;
@@ -148,14 +154,20 @@ public class GameScreen implements Screen {
         viewport.update(width, height, true);
         
         // Atualiza a câmera do jogo e do HUD
+        // Atualiza as dimensões da viewport da câmera do HUD para as novas dimensões virtuais
+        hudCamera.viewportWidth = virtualWidth;
+        hudCamera.viewportHeight = virtualHeight;
         camera.position.set(virtualWidth / 2, virtualHeight / 2, 0);
         hudCamera.position.set(virtualWidth / 2, virtualHeight / 2, 0);
         camera.update();
         hudCamera.update();
         
-        // Passa as novas dimensões para o TrashManager
+        // Passa as novas dimensões para o TrashManager e HudRenderer
         if (trashManager != null) {
             trashManager.setVirtualBounds(virtualWidth, virtualHeight);
+        }
+        if (hudRenderer != null) {
+            hudRenderer.setVirtualBounds(virtualWidth, virtualHeight);
         }
     }
 
