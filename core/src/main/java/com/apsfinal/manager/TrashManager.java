@@ -1,6 +1,7 @@
 package com.apsfinal.manager;
 
 import com.apsfinal.config.GameConfig;
+import com.apsfinal.config.Difficulty;
 import com.apsfinal.model.TrashItem;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -18,14 +19,34 @@ public class TrashManager {
     private float spawnInterval;
     private float virtualWidth;
     private float virtualHeight;
+    private Difficulty difficulty;
+    private float spawnMin;
+    private float spawnMax;
+    private float trashLifeMin;
+    private float trashLifeMax;
+    private int maxTrash;
 
     /**
-     * Construtor inicializa a lista e o primeiro intervalo de spawn.
+     * Construtor padrão (usa dificuldade MÉDIO para compatibilidade).
      */
     public TrashManager() {
+        this(Difficulty.MEDIUM);
+    }
+
+    /**
+     * Construtor com dificuldade específica.
+     * @param difficulty nível de dificuldade
+     */
+    public TrashManager(Difficulty difficulty) {
+        this.difficulty = difficulty;
+        this.spawnMin = difficulty.spawnMin;
+        this.spawnMax = difficulty.spawnMax;
+        this.trashLifeMin = difficulty.trashLifeMin;
+        this.trashLifeMax = difficulty.trashLifeMax;
+        this.maxTrash = difficulty.maxTrash;
         this.activeTrash = new ArrayList<TrashItem>();
         this.spawnTimer = 0f;
-        this.spawnInterval = MathUtils.random(GameConfig.SPAWN_INTERVAL_MIN, GameConfig.SPAWN_INTERVAL_MAX);
+        this.spawnInterval = MathUtils.random(spawnMin, spawnMax);
         // Inicializa com proporção retrato (padrão)
         this.virtualWidth = GameConfig.VIRTUAL_WIDTH;  // 480
         this.virtualHeight = GameConfig.VIRTUAL_HEIGHT; // 854
@@ -45,8 +66,11 @@ public class TrashManager {
      * Atualiza o estado dos lixos.
      * @param delta tempo desde o último frame
      * @param scoreManager gerenciador de pontuação para notificar coletas
+     * @return número de lixos coletados nesta atualização
      */
-    public void update(float delta, ScoreManager scoreManager) {
+    public int update(float delta, ScoreManager scoreManager) {
+        int collectedCount = 0;
+        
         // Atualiza timers e remove lixos coletados ou expirados
         Iterator<TrashItem> iterator = activeTrash.iterator();
         while (iterator.hasNext()) {
@@ -54,6 +78,7 @@ public class TrashManager {
             if (item.collected) {
                 scoreManager.addCollected();
                 iterator.remove();
+                collectedCount++;
             } else if (item.expired) {
                 iterator.remove();
             } else {
@@ -66,11 +91,13 @@ public class TrashManager {
 
         // Spawn de novos lixos
         spawnTimer += delta;
-        if (spawnTimer >= spawnInterval && activeTrash.size() < GameConfig.MAX_TRASH_ON_SCREEN) {
+        if (spawnTimer >= spawnInterval && activeTrash.size() < maxTrash) {
             spawnTrash();
             spawnTimer = 0f;
-            spawnInterval = MathUtils.random(GameConfig.SPAWN_INTERVAL_MIN, GameConfig.SPAWN_INTERVAL_MAX);
+            spawnInterval = MathUtils.random(spawnMin, spawnMax);
         }
+        
+        return collectedCount;
     }
 
     /**
@@ -79,7 +106,7 @@ public class TrashManager {
     private void spawnTrash() {
         float x = MathUtils.random(40f, virtualWidth - 100f);
         float y = MathUtils.random(100f, virtualHeight - 150f);
-        float maxLife = MathUtils.random(GameConfig.TRASH_LIFE_MIN, GameConfig.TRASH_LIFE_MAX);
+        float maxLife = MathUtils.random(trashLifeMin, trashLifeMax);
         TrashItem.TrashType[] types = TrashItem.TrashType.values();
         TrashItem.TrashType type = types[MathUtils.random(types.length - 1)];
         activeTrash.add(new TrashItem(x, y, maxLife, type));

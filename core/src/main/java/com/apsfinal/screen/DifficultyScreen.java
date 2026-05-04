@@ -1,6 +1,7 @@
 package com.apsfinal.screen;
 
 import com.apsfinal.AquaCleanGame;
+import com.apsfinal.config.Difficulty;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
@@ -60,8 +61,7 @@ public class DifficultyScreen implements Screen {
         easyButton.addListener(new com.badlogic.gdx.scenes.scene2d.utils.ClickListener() {
             @Override
             public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
-                // Por enquanto apenas navega para GameScreen (sem alterar dificuldade)
-                game.setScreen(new GameScreen(game));
+                game.setScreen(new GameScreen(game, Difficulty.EASY));
             }
         });
         table.add(easyButton).size(com.badlogic.gdx.scenes.scene2d.ui.Value.percentWidth(0.5f, table), com.badlogic.gdx.scenes.scene2d.ui.Value.percentHeight(0.08f, table)).padBottom(20f).row();
@@ -71,8 +71,7 @@ public class DifficultyScreen implements Screen {
         mediumButton.addListener(new com.badlogic.gdx.scenes.scene2d.utils.ClickListener() {
             @Override
             public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
-                // Por enquanto apenas navega para GameScreen (sem alterar dificuldade)
-                game.setScreen(new GameScreen(game));
+                game.setScreen(new GameScreen(game, Difficulty.MEDIUM));
             }
         });
         table.add(mediumButton).size(com.badlogic.gdx.scenes.scene2d.ui.Value.percentWidth(0.5f, table), com.badlogic.gdx.scenes.scene2d.ui.Value.percentHeight(0.08f, table)).padBottom(20f).row();
@@ -82,8 +81,7 @@ public class DifficultyScreen implements Screen {
         hardButton.addListener(new com.badlogic.gdx.scenes.scene2d.utils.ClickListener() {
             @Override
             public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
-                // Por enquanto apenas navega para GameScreen (sem alterar dificuldade)
-                game.setScreen(new GameScreen(game));
+                game.setScreen(new GameScreen(game, Difficulty.HARD));
             }
         });
         table.add(hardButton).size(com.badlogic.gdx.scenes.scene2d.ui.Value.percentWidth(0.5f, table), com.badlogic.gdx.scenes.scene2d.ui.Value.percentHeight(0.08f, table)).padBottom(30f).row();

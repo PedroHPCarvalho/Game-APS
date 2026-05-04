@@ -1,22 +1,22 @@
 package com.apsfinal.screen;
 
+import com.apsfinal.AquaCleanGame;
+import com.apsfinal.config.Difficulty;
+import com.apsfinal.config.GameConfig;
+import com.apsfinal.manager.ScoreManager;
+import com.apsfinal.manager.TrashManager;
+import com.apsfinal.ui.HudRenderer;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.apsfinal.AquaCleanGame;
-import com.apsfinal.config.GameConfig;
-import com.apsfinal.manager.TrashManager;
-import com.apsfinal.manager.ScoreManager;
-import com.apsfinal.ui.HudRenderer;
 
 /**
  * Tela principal do jogo onde ocorre a ação.
@@ -29,35 +29,43 @@ public class GameScreen implements Screen {
     private TrashManager trashManager;
     private ScoreManager scoreManager;
     private HudRenderer hudRenderer;
+    private Difficulty difficulty;
     private ShapeRenderer shapeRenderer;
     private SpriteBatch batch;
     private boolean goalJustReached;
     private float goalMessageTimer;
+    private boolean trashJustCollected;
+    private float trashMessageTimer;
     private BitmapFont goalFont;
     private Vector3 touchPoint;
     private float virtualWidth;
     private float virtualHeight;
 
     public GameScreen(AquaCleanGame game) {
+        this(game, Difficulty.MEDIUM);
+    }
+
+    public GameScreen(AquaCleanGame game, Difficulty difficulty) {
         this.game = game;
+        this.difficulty = difficulty;
         this.camera = new OrthographicCamera();
         this.hudCamera = new OrthographicCamera();
-        // Inicializa com proporção retrato (padrão)
-        this.virtualWidth = GameConfig.VIRTUAL_WIDTH;  // 480
-        this.virtualHeight = GameConfig.VIRTUAL_HEIGHT; // 854
-        // Configura a câmera do HUD com as dimensões virtuais
+        this.virtualWidth = GameConfig.VIRTUAL_WIDTH;
+        this.virtualHeight = GameConfig.VIRTUAL_HEIGHT;
         this.hudCamera.viewportWidth = virtualWidth;
         this.hudCamera.viewportHeight = virtualHeight;
-        this.hudCamera.position.set(virtualWidth / 2, virtualHeight / 2, 0);
+        this.hudCamera.position.set(virtualWidth / 2f, virtualHeight / 2f, 0f);
         this.hudCamera.update();
         this.viewport = new FitViewport(virtualWidth, virtualHeight, camera);
-        this.trashManager = new TrashManager();
-        this.scoreManager = new ScoreManager();
+        this.trashManager = new TrashManager(difficulty);
+        this.scoreManager = new ScoreManager(difficulty);
         this.hudRenderer = new HudRenderer(scoreManager, virtualWidth, virtualHeight);
         this.shapeRenderer = new ShapeRenderer();
         this.batch = new SpriteBatch();
         this.goalJustReached = false;
         this.goalMessageTimer = 0f;
+        this.trashJustCollected = false;
+        this.trashMessageTimer = 0f;
         this.goalFont = new BitmapFont();
         this.goalFont.getData().setScale(3f);
         this.touchPoint = new Vector3();
@@ -65,7 +73,7 @@ public class GameScreen implements Screen {
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                touchPoint.set(screenX, screenY, 0);
+                touchPoint.set(screenX, screenY, 0f);
                 viewport.unproject(touchPoint);
                 trashManager.handleTap(touchPoint.x, touchPoint.y);
                 return true;
@@ -79,13 +87,18 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
+        int collectedThisFrame = trashManager.update(delta, scoreManager);
+        if (collectedThisFrame > 0) {
+            trashJustCollected = true;
+            trashMessageTimer = 1.0f;
+        }
+
         scoreManager.update(delta);
         if (scoreManager.isGameOver()) {
             game.setScreen(new ResultScreen(game, scoreManager.getScore()));
             return;
         }
 
-        trashManager.update(delta, scoreManager);
         if (scoreManager.checkGoal()) {
             goalJustReached = true;
             goalMessageTimer = 1.5f;
@@ -93,8 +106,15 @@ public class GameScreen implements Screen {
 
         if (goalJustReached) {
             goalMessageTimer -= delta;
-            if (goalMessageTimer <= 0) {
+            if (goalMessageTimer <= 0f) {
                 goalJustReached = false;
+            }
+        }
+
+        if (trashJustCollected) {
+            trashMessageTimer -= delta;
+            if (trashMessageTimer <= 0f) {
+                trashJustCollected = false;
             }
         }
 
@@ -104,65 +124,57 @@ public class GameScreen implements Screen {
         camera.update();
         hudCamera.update();
 
-        // Render background and trash with ShapeRenderer
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        
-        // Background
         shapeRenderer.setColor(0.3f, 0.6f, 0.9f, 1f);
-        shapeRenderer.rect(0, 0, virtualWidth, virtualHeight);
-        
-        // Trash items
+        shapeRenderer.rect(0f, 0f, virtualWidth, virtualHeight);
         trashManager.render(shapeRenderer);
-        
         shapeRenderer.end();
 
-        // Render HUD with SpriteBatch
         hudCamera.update();
         hudRenderer.render(batch, hudCamera);
 
-        // Show time bonus message
         if (goalJustReached) {
             batch.setProjectionMatrix(hudCamera.combined);
             batch.begin();
-            com.badlogic.gdx.graphics.g2d.GlyphLayout bonusLayout = new com.badlogic.gdx.graphics.g2d.GlyphLayout(goalFont, "+15s");
+            String bonusText = "+" + (int) difficulty.timeBonus + "s";
+            com.badlogic.gdx.graphics.g2d.GlyphLayout bonusLayout = new com.badlogic.gdx.graphics.g2d.GlyphLayout(goalFont, bonusText);
             float bonusX = (virtualWidth - bonusLayout.width) / 2f;
             float bonusY = virtualHeight / 2f + bonusLayout.height / 2f;
             goalFont.draw(batch, bonusLayout, bonusX, bonusY);
+            batch.end();
+        }
+
+        if (trashJustCollected) {
+            batch.setProjectionMatrix(hudCamera.combined);
+            batch.begin();
+            String trashText = "+" + difficulty.timePerTrash + "s";
+            com.badlogic.gdx.graphics.g2d.GlyphLayout trashLayout = new com.badlogic.gdx.graphics.g2d.GlyphLayout(goalFont, trashText);
+            float trashX = (virtualWidth - trashLayout.width) / 2f;
+            float trashY = virtualHeight / 2f - 50f + trashLayout.height / 2f;
+            goalFont.draw(batch, trashLayout, trashX, trashY);
             batch.end();
         }
     }
 
     @Override
     public void resize(int width, int height) {
-        // Detecta orientação física
         boolean isLandscape = width > height;
-        
-        // Ajusta dimensões virtuais conforme a orientação
         if (isLandscape) {
-            // Paisagem: inverte para 16:9
-            virtualWidth = GameConfig.VIRTUAL_HEIGHT;  // 854
-            virtualHeight = GameConfig.VIRTUAL_WIDTH; // 480
+            virtualWidth = GameConfig.VIRTUAL_HEIGHT;
+            virtualHeight = GameConfig.VIRTUAL_WIDTH;
         } else {
-            // Retrato: mantém 9:16
-            virtualWidth = GameConfig.VIRTUAL_WIDTH;  // 480
-            virtualHeight = GameConfig.VIRTUAL_HEIGHT; // 854
+            virtualWidth = GameConfig.VIRTUAL_WIDTH;
+            virtualHeight = GameConfig.VIRTUAL_HEIGHT;
         }
-        
-        // Atualiza o viewport com as novas dimensões virtuais
         viewport.setWorldSize(virtualWidth, virtualHeight);
         viewport.update(width, height, true);
-        
-        // Atualiza a câmera do jogo e do HUD
-        // Atualiza as dimensões da viewport da câmera do HUD para as novas dimensões virtuais
         hudCamera.viewportWidth = virtualWidth;
         hudCamera.viewportHeight = virtualHeight;
-        camera.position.set(virtualWidth / 2, virtualHeight / 2, 0);
-        hudCamera.position.set(virtualWidth / 2, virtualHeight / 2, 0);
+        camera.position.set(virtualWidth / 2f, virtualHeight / 2f, 0f);
+        hudCamera.position.set(virtualWidth / 2f, virtualHeight / 2f, 0f);
         camera.update();
         hudCamera.update();
-        
-        // Passa as novas dimensões para o TrashManager e HudRenderer
         if (trashManager != null) {
             trashManager.setVirtualBounds(virtualWidth, virtualHeight);
         }

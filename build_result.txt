@@ -1,0 +1,1 @@
+c:\Users\pedro\Documents\apsfinal>"java.exe" "-Xmx64m" "-Xms64m"   "-Dorg.gradle.appname=gradlew" -jar "c:\Users\pedro\Documents\apsfinal\\gradle\wrapper\gradle-wrapper.jar" lwjgl3:build --console=plain 

@@ -23,7 +23,7 @@ c:\Users\pedro\Documents\apsfinal>java.exe -version  1>NUL 2>&1
 
 c:\Users\pedro\Documents\apsfinal>if 0 EQU 0 goto execute 
 
-c:\Users\pedro\Documents\apsfinal>"java.exe" "-Xmx64m" "-Xms64m"   "-Dorg.gradle.appname=gradlew" -jar "c:\Users\pedro\Documents\apsfinal\\gradle\wrapper\gradle-wrapper.jar" core:compileJava --rerun-tasks 
+c:\Users\pedro\Documents\apsfinal>"java.exe" "-Xmx64m" "-Xms64m"   "-Dorg.gradle.appname=gradlew" -jar "c:\Users\pedro\Documents\apsfinal\\gradle\wrapper\gradle-wrapper.jar" clean core:compileJava --stacktrace 
 
 c:\Users\pedro\Documents\apsfinal>if 0 EQU 0 goto mainEnd 
 
